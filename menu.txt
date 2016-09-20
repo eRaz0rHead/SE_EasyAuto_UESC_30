@@ -1,0 +1,195 @@
+@Variables {
+  firstRun = true
+  blue = 0:200:255
+  orange = 255:200:0
+  green = 200:255:0
+  red = 236:19:19
+  white = 255:255:255
+  
+  lightColor = white
+  fontColor = blue
+  fontSize = 1
+  bootScreenColor = orange
+  bootScreenLCD = “CENTER Welcome Aboard Captain.“
+  
+  line = ”line”
+
+
+}
+
+
+
+@PowerSave {
+  @DimLight  
+  @AutoLCD(Off)
+  @GravDrive(Off)
+  @Diagnostics(Off)
+  @Production(Off)
+  @MasterTimer(On)
+  Clear (BridgeDisplay)
+}
+
+@Setup {
+  @DimLight  
+  @AutoLCD(On)
+  @GravDrive(Off)
+  @Diagnostics(Off)
+  @Production(Off)
+  @MasterTimer(On)
+  Clear (BridgeDisplay)
+}
+
+@Welcome {
+  If firstRun == true {
+  @Setup
+  @BrightLight((PilotLights))
+
+  // Remove [LCD] from group in case it’s already there.
+  Rename (BridgeDisplay) - “[LCD]”
+  Rename (BridgeDisplay) + “[LCD]”
+  @LCD(bootScreenLCD, *, *, (BridgeDisplay))
+  // Doesn’t work.
+  When IsUnderControl of (BridgeStations) == true
+       @HasCaptain(true)
+    
+  firstRun = false
+  Delay 2000
+  Rename (BridgeDisplay) - “[LCD]”
+  }
+}
+
+
+
+// Try “ if (false %1) .. “
+@HasCaptain {
+  @DimLight((PilotLights))
+  @LCD(“CENTER Welcome Aboard Captain.
+ECHO
+ECHO You are now piloting The Calescent  -- a Wayfarer class exploration vessel. 
+ECHO
+ECHO The Calescent features a Class B Helios Gravity Drive for primary propulsion.
+ECHO
+ECHO The Helios responds to standard piloting control without specialized training. 
+ECHO NOTE: Maximum Acceleration is only achieved with Inertial Dampeners OFF. 
+ECHO 
+ECHO A small number of attitude ions provide limited additional propulsion.
+ECHO 
+ECHO Piloting this vessel inside other gravity fields ( natural or artificial ) is not advisable.
+CENTER < Press 1 on your console to initialize systems >”, bootScreenColor)
+}
+
+// Does the *4 work to switch out whole group for block?
+@LCD {
+  PrivateText of Messages *2 = “” *1
+}
+
+@SetCurrentFont {
+  fontColor = fontColor *1
+  fontSize = fontSize *2
+}
+
+@_SetFont {
+  FontColor of Status *1 = fontColor *2
+  FontSize of Status *1 = fontSize *3
+}
+
+@DStatus {
+  If line = "line" *2
+  {
+    WriteLine to Status = "." *1
+  } Else if append = "line" *2 
+  {
+    Write to Status = "." *1
+  } Else {
+    WriteNew to Status = "." *1
+  }
+} 
+
+@Reset {
+  firstRun = true
+  @Welcome
+}
+
+// Note won’t work on SimpleAirlock controlled lights -- they get recolored
+@DimLight {
+  Radius of light %1 = 1
+  Intensity of light %1 = 1
+  // FallOff?
+}
+
+@DiffuseLight {
+  Radius of light %1 = 7
+  Intensity of light %1 = 1
+}
+
+@BrightLight {
+  Radius of light %1 = 4
+  Intensity of light %1 = 3
+}
+
+@Waiting {
+  @_Status(”. . .”, “append”)
+  Delay 300
+}
+
+/// SEE IF THIS WORKS:
+@StartSystem {
+  @_Status(*1)
+  @Waiting
+  @AutoLCD(On) *2
+  @Waiting
+  @_Status(“[Running]”, “append”)
+}
+
+@Initialize {
+  @DiffuseLight((BridgeLights))
+  @_SetFont(orange, 1.5)
+  @_Status(“Initializing Systems”)
+
+  @Waiting
+  
+  @_Status(“[Status Screens]  ”)
+  @Waiting
+  @AutoLCD(On)
+  @Waiting
+  @_Status(“[Running]”, “append”)
+  @_Status(“[Diagnostics]  ”)
+  @Waiting
+  @Diagnostics(On)
+  @Waiting
+  @_Status(“[Running]”, “append”)
+  @_Status(“[Helios Gravity Drive] ”)
+  @Waiting
+  @GravDrive(On)
+  @Waiting
+  @_Status(“[Running]”, “append”)
+  @_Status(“[Production Systems]  ”)
+  @Waiting
+  @Production(On)
+  @Waiting
+  @_Status(“[Running]”, “append”)
+  Delay 5000
+}
+
+@AutoLCD {
+  OnOff of Programmable Block [LCD] = On %1
+  // Lights?
+}
+
+@GravDrive {
+  OnOff of Timer Block [GD] = On *1
+  OnOff of Programmable Block [GD] = On *1
+  If On *1 {
+    TriggerNow Timer Block [GD]
+  }
+}
+
+/// TIM is controlled by MasterTimer?
+@Production {
+  OnOff of Refinery = On *1
+  OnOff of Assembler = On *1
+  OnOff of Programmable Block [TIM] = On *1
+  // OnOff of Timer Block [TIM] = On *1
+  
+  // @DiffuseLight((ProductionLights))
+}
