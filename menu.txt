@@ -13,10 +13,7 @@
   bootScreenLCD = “CENTER Welcome Aboard Captain.“
   
   line = ”line”
-
-
 }
-
 
 
 @PowerSave {
@@ -29,6 +26,7 @@
   Clear (BridgeDisplay)
 }
 
+// Called when entering bridge for first time.
 @Setup {
   @DimLight  
   @AutoLCD(On)
@@ -93,6 +91,8 @@ CENTER < Press 1 on your console to initialize systems >”, bootScreenColor)
   FontSize of Status *1 = fontSize *3
 }
 
+
+// EasyAuto doesn't support variables in this manner
 @DStatus {
   If line = "line" *2
   {
