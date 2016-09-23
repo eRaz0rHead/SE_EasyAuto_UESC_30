@@ -1,20 +1,32 @@
 @Variables {
-  firstRun = true
-  blue = 0:200:255
-  orange = 255:200:0
-  green = 200:255:0
-  red = 236:19:19
-  white = 255:255:255
+  blue = "0:200:255"
+  orange = "255:200:0"
+  green = "200:255:0"
+  red = "236:19:19"
+  offwhite = "200:169:88"
   
-  lightColor = white
+  lightColor = offwhite
   fontColor = blue
   fontSize = 1
-  bootScreenColor = orange
-  bootScreenLCD = “CENTER Welcome Aboard Captain.“
+  bootScreenColor = blue
+  _lbg = BridgeLights
   
-  line = ”line”
-}
+  bootScreenLCD = “CENTER Welcome Aboard Captain.“
+  welcomeScreenTxt = “CENTER Welcome Aboard Captain.
+ECHO
+ECHO You are now piloting The Calescent  -- a Wayfarer class exploration vessel. 
+ECHO
+ECHO The Calescent features a Class B Helios Gravity Drive for primary propulsion.
+ECHO
+ECHO The Helios responds to standard piloting control without specialized training. 
+ECHO NOTE: Maximum Acceleration is only achieved with Inertial Dampeners OFF. 
+ECHO 
+ECHO A small number of attitude ions provide limited additional propulsion.
+ECHO 
+ECHO Piloting this vessel inside other gravity fields ( natural or artificial ) is not advisable.
+CENTER < Press 1 on your console to initialize systems >”
 
+}
 
 @PowerSave {
   @DimLight  
@@ -38,18 +50,20 @@
 }
 
 @Welcome {
-  If firstRun == true {
+  If firstRun = true {
   @Setup
   @BrightLight((PilotLights))
 
   // Remove [LCD] from group in case it’s already there.
   Rename (BridgeDisplay) - “[LCD]”
   Rename (BridgeDisplay) + “[LCD]”
-  @LCD(bootScreenLCD, *, *, (BridgeDisplay))
+  @LCD(bootScreenLCD)
+  
   // Doesn’t work.
   When IsUnderControl of (BridgeStations) == true
        @HasCaptain(true)
     
+  // doesn't work either -- can't store vars between runs.
   firstRun = false
   Delay 2000
   Rename (BridgeDisplay) - “[LCD]”
@@ -58,7 +72,7 @@
 
 
 
-// Try “ if (false %1) .. “
+// Try “ if (false ) .. “
 @HasCaptain {
   @DimLight((PilotLights))
   @LCD(“CENTER Welcome Aboard Captain.
@@ -76,34 +90,10 @@ ECHO Piloting this vessel inside other gravity fields ( natural or artificial ) 
 CENTER < Press 1 on your console to initialize systems >”, bootScreenColor)
 }
 
-// Does the *4 work to switch out whole group for block?
 @LCD {
-  PrivateText of Messages *2 = “” *1
+//  Run MoveItPB "Messages PrivateText *1"  //MoveIt doesn's seem to support writing to private text!
+  PrivateText of Messages = “” *1  // Need to write my own extension for this! Might as well roll Falloff into that.
 }
-
-@SetCurrentFont {
-  fontColor = fontColor *1
-  fontSize = fontSize *2
-}
-
-@_SetFont {
-  FontColor of Status *1 = fontColor *2
-  FontSize of Status *1 = fontSize *3
-}
-
-
-// EasyAuto doesn't support variables in this manner
-@DStatus {
-  If line = "line" *2
-  {
-    WriteLine to Status = "." *1
-  } Else if append = "line" *2 
-  {
-    Write to Status = "." *1
-  } Else {
-    WriteNew to Status = "." *1
-  }
-} 
 
 @Reset {
   firstRun = true
@@ -112,19 +102,27 @@ CENTER < Press 1 on your console to initialize systems >”, bootScreenColor)
 
 // Note won’t work on SimpleAirlock controlled lights -- they get recolored
 @DimLight {
-  Radius of light %1 = 1
-  Intensity of light %1 = 1
-  // FallOff?
+  Radius of (_lbg) = 1.5
+  Intensity of (_lbg) = 0.5
+  Run MoveItPB "\_lbg Falloff 1.5"
 }
 
 @DiffuseLight {
-  Radius of light %1 = 7
-  Intensity of light %1 = 1
+  Radius of (_lbg) = 10
+  Intensity of (_lbg) = 0.5
+  Run MoveItPB "\_lbg Falloff 1"
 }
 
 @BrightLight {
-  Radius of light %1 = 4
-  Intensity of light %1 = 3
+  Radius of (_lbg)  = 4
+  Intensity of (_lbg)  = 3
+  Run MoveItPB "\_lbg Falloff 1"
+}
+
+@IntenseLight {
+  Radius of (_lbg)  = 3
+  Intensity of (_lbg)  = 4
+  Run MoveItPB "\_lbg Falloff 2"
 }
 
 @Waiting {
@@ -172,8 +170,7 @@ CENTER < Press 1 on your console to initialize systems >”, bootScreenColor)
 }
 
 @AutoLCD {
-  OnOff of Programmable Block [LCD] = On %1
-  // Lights?
+  OnOff of Programmable Block [LCD] = On 
 }
 
 @GravDrive {
@@ -189,7 +186,5 @@ CENTER < Press 1 on your console to initialize systems >”, bootScreenColor)
   OnOff of Refinery = On *1
   OnOff of Assembler = On *1
   OnOff of Programmable Block [TIM] = On *1
-  // OnOff of Timer Block [TIM] = On *1
-  
   // @DiffuseLight((ProductionLights))
 }
