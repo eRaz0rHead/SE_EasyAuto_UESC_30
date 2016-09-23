@@ -1,0 +1,84 @@
+@Variables {
+  blue = "0:200:255"
+  orange = "255:200:0"
+  green = "200:255:0"
+  red = "236:19:19"
+  offwhite = "200:169:88"
+  
+  lightColor = offwhite
+  fontColor = blue
+  fontSize = 1
+  bootScreenColor = blue
+  _lbg = BridgeLights
+  _ss = TriggerNow of SS
+  
+  bootScreenLCD = “CENTER Welcome Aboard Captain.
+CENTER Please take a seat to assume command.“
+
+  welcomeScreenTxt = “CENTER Welcome Aboard Captain.
+ECHO
+ECHO You are now piloting The Calescent  -- a Wayfarer class exploration vessel. 
+ECHO
+ECHO The Calescent features a Class B Helios Gravity Drive for primary propulsion.
+ECHO
+ECHO The Helios responds to standard piloting control without specialized training. 
+ECHO NOTE: Maximum Acceleration is only achieved with Inertial Dampeners OFF. 
+ECHO 
+ECHO A small number of attitude ions provide limited additional propulsion.
+ECHO 
+ECHO Piloting this vessel inside other gravity fields ( natural or artificial ) is not advisable.
+CENTER < Press 1 on your console to initialize systems >”
+
+}
+
+@Setup {
+  if _ss > 1000 {
+    @AutoLCD(Off)
+    @Diagnostics(Off)
+    OnOff of (BridgeLights) = Off
+    OnOff of (HeliosLights) = Off
+    OnOff of (DeckLights) = Off
+    OnOff of (RunningLights) = Off
+    OnOff of Timer Block - Master = On
+    Clear (BridgeDisplay)
+    TriggerNow of SS = 1
+  }
+}
+
+@Welcome {
+  if _ss = 1 {
+    @SoftBridgeLights
+    Delay 500
+
+    Rename (BridgeDisplay) - “ [LCD]”
+    Rename (BridgeDisplay) + “ [LCD]”
+    
+    @AutoLCD(On)
+    
+    // Doesn’t work.
+    When IsUnderControl of (PilotSeat) = true
+         @HasCaptain(true)
+      
+  
+    Delay 2000
+    Rename (BridgeDisplay) - “[LCD]”
+    }
+  }
+  
+}
+
+// Try “ if (false ) .. “
+@HasCaptain {
+  @DimLight((BridgeLights))
+  @LCD(welcomeScreenTxt, bootScreenColor)
+}
+
+@LCD {
+//  Run MoveItPB "Messages PrivateText *1"  //MoveIt also does not support writing to private text!
+  PrivateText of Messages = “” *1  // Need to write my own extension for this! Might as well roll Falloff into that.
+}
+
+@Reset {
+  TriggerNow of SS = 1
+  @Welcome
+}
