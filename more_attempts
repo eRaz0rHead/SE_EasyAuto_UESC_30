@@ -9,26 +9,32 @@
   fontColor = blue
   fontSize = 1
   bootScreenColor = blue
-  _lbg = BridgeLights
-  _ss = TriggerNow of SS
   
-  bootScreenLCD = “CENTER Welcome Aboard Captain.
-CENTER Please take a seat to assume command.“
+  _init = " << Initializing >> "
+  
+  
+  
+  bootScreenLCD = “    <<   Welcome Aboard Captain.  >>
+          Please take a seat to assume command.“
 
-  welcomeScreenTxt = “CENTER Welcome Aboard Captain.
-ECHO
-ECHO You are now piloting The Calescent  -- a Wayfarer class exploration vessel. 
-ECHO
-ECHO The Calescent features a Class B Helios Gravity Drive for primary propulsion.
-ECHO
-ECHO The Helios responds to standard piloting control without specialized training. 
-ECHO NOTE: Maximum Acceleration is only achieved with Inertial Dampeners OFF. 
-ECHO 
-ECHO A small number of attitude ions provide limited additional propulsion.
-ECHO 
-ECHO Piloting this vessel inside other gravity fields ( natural or artificial ) is not advisable.
-CENTER < Press 1 on your console to initialize systems >”
+  welcomeScreenTxt = “        Welcome Aboard Captain.
 
+ You are now piloting The Calescent  -- a Wayfarer class exploration vessel. 
+
+ The Calescent features a Class B Helios Gravity Drive for primary propulsion.
+
+ The Helios responds to standard piloting control without specialized training. 
+ NOTE: Maximum Acceleration is only achieved with Inertial Dampeners OFF. 
+ 
+ A small number of attitude ions provide limited additional propulsion.
+ 
+ Piloting this vessel inside other gravity fields ( natural or artificial ) is not advisable.
+”
+}
+
+@Reset {
+  TriggerNow of SS = 1
+  @Welcome
 }
 
 @Setup {
@@ -41,44 +47,84 @@ CENTER < Press 1 on your console to initialize systems >”
     OnOff of (RunningLights) = Off
     OnOff of Timer Block - Master = On
     Clear (BridgeDisplay)
+    Rename (BridgeDisplay) - “ [LCD]”
     TriggerNow of SS = 1
   }
 }
 
 @Welcome {
-  if _ss = 1 {
+  if TriggerNow of SS = 1 {
+   FontColor of Messages = blue
     @SoftBridgeLights
     Delay 500
-
-    Rename (BridgeDisplay) - “ [LCD]”
-    Rename (BridgeDisplay) + “ [LCD]”
+    WriteNew to (BridgeDisplay) bootScreenLCD
     
-    @AutoLCD(On)
-    
-    // Doesn’t work.
-    When IsUnderControl of (PilotSeat) = true
-         @HasCaptain(true)
-      
-  
-    Delay 2000
-    Rename (BridgeDisplay) - “[LCD]”
+    When IsUnderControl of (PilotSeat) = true     /// Replace with a sensor?
+    {
+      @DimBridgeLights
+      Clear (BridgeDisplay)
+      WriteNew To Messages welcomeScreenTxt
+      Delay 3000
+      TriggerNow of SS = 2
+      @Init
     }
   }
+}
+
+
+@Init {
+  @AutoLCD(On)
+  FontColor of screen_diagnostics = orange
+  FontColor of Messages = orange
+  WriteNew to screen_diagnostics = "\_init"
+  WriteNew to Messages = "\_init"
+  delay 200
+  WriteNew to grav_status = "\_init"
+  delay 1000
   
+  WriteLine to screen_diagnostics_reports = " >> Diagnostic systems ... "
+  WriteLine to Messages = " >> Diagnostic systems ... "
+  delay 700
+    @DiagnosticsOn
+    Write to Messages = " .. ONLINE "
+    
+  WriteLine to grav_status = " >> Helios Drive Systems  ..."
+  WriteLine to Messages = " >> Helios Drive Systems  ..."
+ 
+  delay 300
+    @HeliosOn
+    Write to Messages = " .. ONLINE "
+  
+  Rename grav_status + "[LCD]"
+  
+  WriteLine to Messages = " >> Production Systems ..."
+  delay 1000
+    @ProductionOn
+    Write to Messages = " .. ONLINE "
+  
+  
+  Delay 2000
+  Rename Messages + "[LCD]"
 }
 
-// Try “ if (false ) .. “
-@HasCaptain {
-  @DimLight((BridgeLights))
-  @LCD(welcomeScreenTxt, bootScreenColor)
+@DiagnosticsOn {
+  OnOff of Programming Block - Diagnostics = On
+  OnOff of Timer Block - Diagnostics = On
+  Start Timer Block - Diagnostics
 }
 
-@LCD {
-//  Run MoveItPB "Messages PrivateText *1"  //MoveIt also does not support writing to private text!
-  PrivateText of Messages = “” *1  // Need to write my own extension for this! Might as well roll Falloff into that.
+@HeliosOn {
+  OnOff of (HeliosLights) = On
+  OnOff of Programming Block [GD] = On
+  Run Programming Block [GD] = "Reset"
+  OnOff of Timer Block [GD] = On
+  Start Timer Block [GD]
 }
 
-@Reset {
-  TriggerNow of SS = 1
-  @Welcome
+@ProductionOn {
+  OnOff of Refinery = On
+  OnOff of Assember = On
+  OnOff of Arc Furnace = On
+  OnOff of [TIM] = On
+  OnOff of (RunningLights) = On
 }
