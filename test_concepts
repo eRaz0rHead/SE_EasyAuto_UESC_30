@@ -1,3 +1,6 @@
+
+///  THIS DOES NOT WORK, since EasyAutomation does not allow for variable substitution in IF statements
+
 @Variables {
   ss = TriggerDelay of SS
 }
