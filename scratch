@@ -1,0 +1,42 @@
+@Variables {
+   softColor = "200:135:77"
+   alertColor = "255:44:0"
+   brightDeck = "200:126:0"
+   blue = "0:200:255"
+   orange = "255:200:0"
+    deckI = Intensity of (DeckLights)
+}
+
+@Dark {
+    OnOff of (RunningLights) = Off
+    Delay 1000
+    OnOff of (DeckLights) = Off
+    Delay 1000
+    OnOff of (HeliosLights) = Off
+    Delay 1000
+    OnOff of (BridgeLights) = Off
+}
+
+@Init {
+    OnOff of (BridgeLights) = On
+    Delay 1000
+    OnOff of (HeliosLights) = On 
+    Delay 1000 
+    OnOff of (DeckLights) = On  
+    Delay 1000 
+    OnOff of (RunningLights) = On
+}
+
+
+@AlertDeck {
+    Radius of (DeckLights) = 3 
+    Intensity of (DeckLights) = 3
+    Color of (DeckLights) = brightDeck
+}
+
+@SoftDeck { 
+    Radius of (DeckLights) = 10 
+    Intensity of (DeckLights) = 0.5 
+    Color of (DeckLights) = softColor
+
+}
