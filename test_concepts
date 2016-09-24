@@ -2,25 +2,26 @@
   ss = TriggerDelay of SS
 }
 
-@TestVarScope {
-  Write to TestDisplay = "ss starts set to \ss"
-  TriggerDelay of SS = 1
-  if ss != 1 {
-    Write to TestDisplay = "ss was not re-calculated immediately"
-    @TestInline
-  }
+@Test1 { 
+    WriteNew to TestDisplay = ss 
 }
-
-@TestInline {
-  if ss != 1 {
-    Write to TestDisplay = "ss inline remains @ \ss"
-    Delay 1000
-    @TestAfterDelay
-  } 
+@TestVarScope { 
+    WriteNew to TestDisplay = "ss starts set " 
+    TriggerDelay of SS = 1
+    If ss != 1 { 
+        WriteLine to TestDisplay = "ss was not re-calculated immediately"    
+    } 
 }
-
-@TestAfterDelay {
-  if ss != 1 {
-    Write to TestDisplay = "ss after delay remains @ \ss"
-  } 
+ 
+@TestInline {  
+  if ss != 1 {  
+    WriteLine to TestDisplay = "ss inline remains @ \ss"  
+    Delay 1000  
+    @TestAfterDelay  
+  }  
+}  
+@TestAfterDelay {  
+    if ss != 1 {  
+        Write to TestDisplay = "ss after delay remains @ \ss"  
+    }  
 }
