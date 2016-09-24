@@ -38,7 +38,7 @@
 }
 
 @Setup {
-  if _ss > 1000 {
+  if TriggerNow of SS > 1000 {
     @AutoLCD(Off)
     @Diagnostics(Off)
     OnOff of (BridgeLights) = Off
