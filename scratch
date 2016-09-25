@@ -1,95 +1,110 @@
-@Variables {
-   softColor = "200:135:77"
-   alertColor = "255:44:0"
-   brightDeck = "200:126:0"
-   blue = "0:200:255"
-   orange = "255:200:0"
-   green = "200:255:0" 
-   red = "236:19:19" 
-   offwhite = "200:169:88" 
-  _init = " << Initializing >> " 
-  bs = "<<   Welcome Aboard Captain.  >> 
-          Please take a seat to assume command."
-  wst = "             Welcome Aboard Captain.  
+@Variables { 
+   softColor = "200:135:77" 
+   alertColor = "255:44:0" 
+   brightDeck = "200:126:0" 
+   blue = "0:200:255" 
+   orange = "255:200:0" 
+   green = "200:255:0"  
+   red = "236:19:19"  
+   offwhite = "200:169:88"  
+
+    _ss = TriggerDelay of #SS
+
+  _init = " << Initializing >> "  
+  bs = "<<   Welcome Aboard Captain.  >>  
+          Please take a seat to assume command." 
+  wst = "             Welcome Aboard Captain.   
+   
+   You are now piloting The Calescent    
+                 -- a Wayfarer class exploration vessel.    
   
-   You are now piloting The Calescent   
-                 -- a Wayfarer class exploration vessel.   
+  The Calescent features a Class B Helios Gravity Drive  
+  The Helios responds to standard piloting controls   
+       (No specialized training required)  
+  NOTE: Maximum Acceleration is only achieved with  
+         Inertial Dampeners OFF.   
+   Attitude ions provide limited additional propulsion.   
+   Piloting this vessel inside other gravity fields is not advised. " 
+} 
+@Restart {  
+  TriggerDelay of #SS = 3600  
+  @Start
+} 
+@Start { 
+    if TriggerDelay of #SS > 1000
+{
+   @screen_diagnostic_main(AutoLCDOff) 
+   @screen_diagnostic_main(DiagnosticsOff) 
+   OnOff of (BridgeLights) = Off  
+   OnOff of (HeliosLights) = Off  
+   OnOff of (DeckLights) = Off  
+   OnOff of (RunningLights) = Off  
+   OnOff of Timer Block - Master = On  
+   Clear (BridgeDisplay)  
+   Rename status - " [LCD]"  
+   TriggerDelay of #SS = 2
+} 
+} 
+@Welcome {
+   if TriggerDelay of #SS < 3 
+{
+   @screen_diagnostic_main(SoftBridgeLights)    
+   Delay 1000     
+   FontSize of screen_diagnostic_1  = 1.5    
+   FontColor of screen_diagnostic_1 = offwhite      
+   FontColor of screen_diagnostic_main = offwhite     
+   FontSize of screen_diagnostic_main = 1.5    
+   WriteNew to screen_diagnostic_1 = "\bs"    
+  WriteNew to screen_diagnostic_main = "\bs"   
+   TriggerDelay of #SS = 3
+}   
+} 
+@HasPilot { 
+    if TriggerDelay of #SS = 3
+{
+   @screen_diagnostic_main(DimBridgeLights)     
+   Clear (BridgeDisplay)       
  
-  The Calescent features a Class B Helios Gravity Drive 
-  The Helios responds to standard piloting controls  
-       (No specialized training required) 
-  NOTE: Maximum Acceleration is only achieved with 
-         Inertial Dampeners OFF.  
-   Attitude ions provide limited additional propulsion.  
-   Piloting this vessel inside other gravity fields is not advised. "
+   FontColor of screen_diagnostic = blue 
+   WriteNew to screen_diagnostic_main = "\wst"     
+   WriteNew to screen_diagnostic_1 = "\wst"      
+   Delay 5000       
+   TriggerDelay of #SS = 5 
+    @Init
 }
-@Restart { 
-  TriggerDelay of #SS = 3600 
-  @screen_diagnostic_reports(Start)
 }
-@Start {
-   @screen_diagnostic_main(AutoLCDOff)
-   @screen_diagnostic_main(DiagnosticsOff)
-   OnOff of (BridgeLights) = Off 
-   OnOff of (HeliosLights) = Off 
-   OnOff of (DeckLights) = Off 
-   OnOff of (RunningLights) = Off 
-   OnOff of Timer Block - Master = On 
-   Clear (BridgeDisplay) 
-   Rename grav_status - " [LCD]" 
-   Rename Messages - " [LCD]"
-   TriggerDelay of #SS = 1 
+@Init {
+if TriggerDelay of #SS = 5 
+{    
+   @screen_diagnostic_main(AutoLCDOff) 
+   FontSize of grav_status  = 1.5    
+   FontSize of screen_diagnostic_reports = 1.4    
+   FontColor of screen_diagnostic_reports = orange     
+   FontColor of grav_status = orange     
+   FontColor of screen_diagnostic_1 = orange     
+   WriteNew to screen_diagnostic_reports = "\_init"      
+   WriteNew to screen_diagnostic_1 = "\_init"      
+   delay 700      
+   WriteNew to grav_status = "\_init"      
+   delay 1000      
+   WriteLine to screen_diagnostic_reports = " >> Diagnostic systems ... "      
+   WriteLine to screen_diagnostic_1 = " >> Diagnostic systems ... "      
+   delay 1700      
+   @screen_diagnostic_main(DiagnosticsOn)     
+   Write to screen_diagnostic_1 = " .. ONLINE "      
+   WriteLine to grav_status = " >> Helios Drive Systems  ..."      
+   WriteLine to screen_diagnostic_1 = " >> Helios Drive Systems  ..."      
+   delay 1200  
+   @screen_diagnostic_main(HeliosOn)       
+   Write to screen_diagnostic_1 = " .. ONLINE "      
+   Rename grav_status - " [LCD]"      
+   Rename grav_status + " [LCD]"      
+   WriteLine to screen_diagnostic_1 = " >> Production Systems ..."      
+   delay 1500 
+   @screen_diagnostic_main(ProductionOn)   
+   Write to screen_diagnostic_1  = " .. ONLINE "      
+   Delay 2000
+    FontSize of screen_diagnostic_1  = 1.2
+   @screen_diagnostic_main(AutoLCDOn) 
 }
-@Welcome {   
-   @screen_diagnostic_main(SoftBridgeLights)   
-   Delay 500    
-   FontSize of Messages = 1.5   
-   FontColor of Messages = offwhite     
-   FontColor of screen_diagnostic_main = offwhite    
-   FontSize of screen_diagnostic_main = 1.5   
-   WriteNew to screen_diagnostic_main = "\bs"   
-   WriteNew to Messages = "\bs"   
-   DELAY 5000    
-   @screen_diagnostic_main(DimBridgeLights)   
-   Clear (BridgeDisplay)     
-   FontSize of Messages = 1.4   
-   FontColor of Messages = blue     
-   WriteNew To Messages = "\wst"    
-   Delay 3000     
-   TriggerDelay of #SS = 2   
-}
-@Init {     
-   @screen_diagnostic_main(AutoLCDOff)
-   Clear(Messages)   
-   FontSize of Messages  = 2   
-   FontSize of grav_status  = 1.5   
-   FontSize of screen_diagnostic_reports = 1.4   
-   FontColor of screen_diagnostic_reports = orange    
-   FontColor of grav_status = orange    
-   FontColor of Messages = orange    
-   WriteNew to screen_diagnostic_reports = "\_init"     
-   WriteNew to Messages = "\_init"     
-   delay 700     
-   WriteNew to grav_status = "\_init"     
-   delay 1000     
-   WriteLine to screen_diagnostic_reports = " >> Diagnostic systems ... "     
-   WriteLine to Messages = " >> Diagnostic systems ... "     
-   delay 1700     
-   @screen_diagnostic_main(DiagnosticsOn)    
-   Write to Messages = " .. ONLINE "     
-   WriteLine to grav_status = " >> Helios Drive Systems  ..."     
-   WriteLine to Messages = " >> Helios Drive Systems  ..."     
-   delay 1200 
-   @screen_diagnostic_mains(HeliosOn)      
-   Write to Messages = " .. ONLINE "     
-   Rename grav_status - " [LCD]"     
-   Rename grav_status + " [LCD]"     
-   WriteLine to Messages = " >> Production Systems ..."     
-   delay 1500
-   @screen_diagnostic_main(ProductionOn)  
-   Write to Messages = " .. ONLINE "     
-   Delay 2000     
-   Rename Messages - " [LCD]"   
-   Rename Messages + " [LCD]"   
-   @screen_diagnostic_main(AutoLCDOn)
 }
