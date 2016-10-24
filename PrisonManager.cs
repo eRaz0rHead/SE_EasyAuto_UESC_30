@@ -11,11 +11,11 @@ class PrisonManager: EasyAPI
     }
   }
   
-  void FindCell(string arg) {
+  PrisonCell FindCell(string arg) {
     System.Text.RegularExpressions.Match m = (new System.Text.RegularExpressions.Regex("([1-5])([A-D]")).Match(arg);
     if (!m.Success) {
       Echo("No Prison called " + arg + " found");
-      return;
+      return null;
     }
     var rotor = m.Groups[1].Value;
     var chamber = m.Groups[2].Value; 
