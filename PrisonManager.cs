@@ -6,7 +6,7 @@ class PrisonManager: EasyAPI
   
   void Init() {
     for (var block in Blocks.byNameRegex(PrisonCell.CellPattern) {
-      PrisonCell p = new PrisonCell(PrisonManager, block);
+      PrisonCell p = new PrisonCell(this, block);
       Prisons[p.id] = p;
     }
   }
@@ -53,8 +53,10 @@ class PrisonCell {
   String requestedChamber;
   Dictionary < string, IMyCryoChamber > chambers;
 
-  PrisonCell(EasyBlock rotor) {
+  PrisonCell(PrisonManager manager, EasyBlock rotor) {
     this.rotor = rotor;
+    this.manager = manager;
+    
     System.Text.RegularExpressions.Match m = (new System.Text.RegularExpressions.Regex(CellPattern).Match(rotor.Name());
     if (m.Success) {
      this.id = Int32.Parse(m.Groups[1].Value);
