@@ -2,7 +2,7 @@
 class PrisonManager: EasyAPI
 {
   Dictionary<int, PrisonCell> prisons = new Dictonary<int,PrisonCell>();
-  List<int> rotorLinks = [2, 1];
+  List<int> rotorLinks = new List<int> { 2, 1 };
   
   void Init() {
     for (var block in Blocks.byNameRegex(PrisonCell.CellPattern) {
