@@ -23,6 +23,8 @@ class PrisonManager: EasyAPI
     cell.requestedChamber = chamber;
     return cell;
   }
+  
+  
 }
 
 class PrisonCell {
@@ -64,24 +66,35 @@ class PrisonCell {
     //}
    }
 
-  int GetRotorAngle() {
-   return Int32.Parse(rotor.GetDetailedInfo()[“Current angle”]);
+  float GetRotorAngle() {
+    string angleText = rotor.DetailedInfo()[“Current angle”]);
+    return float.Parse(angleText.Split(' ')[0]);
   }
   
-  int GetCurrentAngle() {
-   // sum across the rotor-links;
-   int idx = rotorLinks.indexOf(id);
-   if (idx == -1) return GetRotorAngle();
-   int angle;
-   for (idx; idx < rotorLinks.Count(); idx++) {
-    angle += manager.prisons[idx].GetRotorAngle();
-   }
-   return angle;
+  float GetCurrentAngle() {
+    // sum across the rotor-links;
+    int idx = rotorLinks.indexOf(id);
+    if (idx == -1) return GetRotorAngle();
+    float angle;
+    for (idx; idx < rotorLinks.Count(); idx++) {
+      angle += manager.prisons[idx].GetRotorAngle();
+    }
+    return angle;
   }
 
-  void SetCurrentAngle(int angle) {
-
-
+  void SetCurrentAngle(float angle) {
+    float current = GetCurrentAngle();
+    float speed = 3.0;
+    rotor.SetValueFloat("UpperLimit", angle); 
+    rotor.SetValueFloat("LowerLimit", angle);
+    int diff = angle - current
+    if (diff == 0) return;
+    if (diff < 0 && diff > -180) {
+      // TODO -- setting Upper == Lower is janky. We should detect direction and set upper > lower
+      // in the direction that the thing is turning.
+      speed = -3.0;
+    }
+    rotor.SetValueFloat("Velocity", speed);
   }
   
   string visibleChamber() {
