@@ -59,11 +59,12 @@ class PrisonCell {
     if (m.Success) {
      this.id = Int32.Parse(m.Groups[1].Value);
     }
-    // TODO -- initialize chamber list
-    // gridBlocks = rotor.grid.getBlocks...
-    //for (var block in gridBlocks.byNameRegex(PrisonCell.ChamberPattern) {
+    // // TODO -- initialize chamber list
+    // // Not sure if RotorGrid is visible via this API.
+    // var gridBlocks = rotor.RotorGrid.getBlocks etc...
+    // for (var block in gridBlocks.byNameRegex(PrisonCell.ChamberPattern) {
     // 
-    //}
+    // }
    }
 
   float GetRotorAngle() {
