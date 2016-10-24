@@ -1,12 +1,17 @@
 
+string CellPattern = "Cell 00([1-5])";
+string ChamberPattern = "Cryo ([1-5])([A-D])";
+
 class PrisonManager: EasyAPI
 {
   Dictionary<int, PrisonCell> prisons = new Dictonary<int,PrisonCell>();
   List<int> rotorLinks = new List<int> { 2, 1 };
   
   void Init() {
-    for (var block in Blocks.byNameRegex(PrisonCell.CellPattern)) {
-      PrisonCell p = new PrisonCell(this, block);
+    EasyBlocks rotors;
+    rotors = Blocks.NameRegex(CellPattern);
+    for(int n = 0; n < rotors.Count; n++) {
+      PrisonCell p = new PrisonCell(this, rotors[n]);
       prisons[p.id] = p;
     }
   }
@@ -76,9 +81,6 @@ class PrisonManager: EasyAPI
   PRISON CELL CLASS
  */
 class PrisonCell {
-  static string CellPattern = "Cell 00([1-5])";
-  static string ChamberPattern = "Cryo ([A-D])";
-
   public static int CHAMBER_ANGLES(string name) {
     switch (name) {
      case "A": return 45;
@@ -103,12 +105,7 @@ class PrisonCell {
     if (m.Success) {
      this.id = int.Parse(m.Groups[1].Value);
     }
-    // // TODO -- initialize chamber list
-    // // Not sure if RotorGrid is visible via this API.
-    // var gridBlocks = rotor.RotorGrid.getBlocks etc...
-    // for (var block in gridBlocks.byNameRegex(PrisonCell.ChamberPattern) {
-    // 
-    // }
+   
    }
 
   float GetRotorAngle() {
