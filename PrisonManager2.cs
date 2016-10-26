@@ -1,4 +1,3 @@
-
 string CellPattern = "Cell 00([1-5])";
 string IDPattern = "([1-5])([A-D])";
 string ChamberPattern = "Cryo "+IDPattern;
@@ -233,7 +232,6 @@ class PrisonCell {
   // TODO
   void openEmptyChamber() {
   }
-  
   // TODO
   bool currentCellIsOccupied() {
     return true;
