@@ -1,15 +1,45 @@
 
 string CellPattern = "Cell 00([1-5])";
 string ChamberPattern = "Cryo ([1-5])([A-D])";
+string ArgumentPattern = "([1-5])([A-D]";
+
+class Util {
+  public static System.Text.RegularExpressions.Match NameRegex(IMyTerminalBlock block, string Pattern) {
+    return
+        new System.Text.RegularExpressions.Regex(Pattern).Match(block.GetCustomName());
+  }
+  
+  public static Dictionary<string, string> DetailedInfo(IMyTerminalBlock block) {
+    Dictionary<string, string> properties = new Dictionary<string, string>();
+    var statements = block.DetailedInfo.Split('\n');
+    for (int n = 0; n < statements.Length; n++) {
+        var pair = statements[n].Split(':');
+        properties.Add(pair[0], pair[1].Substring(1));
+    }
+    return properties;
+  }
+}
 
 class PrisonManager 
 {
+  IMyGridTerminalSystem grid;
+  IMyProgrammableBlock me;
+  
   Dictionary<int, PrisonCell> prisons = new Dictonary<int,PrisonCell>();
   List<int> rotorLinks = new List<int> { 2, 1 };
   
+  public PrisonManager(IMyGridTerminalSystem grid, IMyProgrammableBlock me) {
+    this.grid = grid;
+    this.me = me;
+    Init();
+  }
+  
   void Init() {
-    EasyBlocks rotors;
-    rotors = Blocks.NameRegex(CellPattern);
+    List<IMyTerminalBlock> rotors;
+    rotors = grid.SearchBlocksOfName("Cell", rotors, 
+      delegate(IMyTerminalBlock block) {
+        return Util.NameRegex(block).Success;
+      });
     for(int n = 0; n < rotors.Count; n++) {
       PrisonCell p = new PrisonCell(this, rotors[n]);
       prisons[p.id] = p;
@@ -17,7 +47,7 @@ class PrisonManager
   }
   
   PrisonCell FindCell(string arg) {
-    System.Text.RegularExpressions.Match m = (new System.Text.RegularExpressions.Regex("([1-5])([A-D]")).Match(arg);
+    System.Text.RegularExpressions.Match m = (new System.Text.RegularExpressions.Regex(ArgumentPattern)).Match(arg);
     if (!m.Success) {
       Echo("No Prison called [" + arg + "] found");
       return null;
@@ -35,7 +65,9 @@ class PrisonManager
   }
   void LockCell(string arg) {
     PrisonCell cell = FindCell(arg);
-    if (cell != null) cell.lock();
+    if (cell != null) {
+      cell.close();
+    }
   }
   
   void OpenAll() {
@@ -45,7 +77,7 @@ class PrisonManager
   }
   void LockAll() {
     for (var p in prisons) {
-      p.lock();
+      p.close();
     }
   }
   
@@ -56,7 +88,7 @@ class PrisonManager
         prison.openEmptyChamber();
         found = true;
       } else {
-        prison.lock();
+        prison.close();
       }
     }
   }
@@ -64,7 +96,7 @@ class PrisonManager
   void LockAllOccupied() {
     for (PrisonCell prison in prisons) {
       if (prison.currentCellIsOccupied()) {
-        prison.lock();
+        prison.close();
       }
     }
   }
@@ -90,26 +122,24 @@ class PrisonCell {
      default:  return -1;
     }
   }
-  // IMyRotorStator
-  EasyBlock rotor;
+  IMyRotorStator rotor;
   PrisonManager manager;
   int id;
   string requestedChamber;
   Dictionary <string, IMyCryoChamber> chambers = new Dictonary<int, IMyCryoChamber>();
 
-  PrisonCell(PrisonManager manager, EasyBlock rotor) {
+  PrisonCell(PrisonManager manager, IMyRotorStator rotor) {
     this.rotor = rotor;
     this.manager = manager;
     
-    System.Text.RegularExpressions.Match m = (new System.Text.RegularExpressions.Regex(CellPattern).Match(rotor.Name());
+    var m = Util.NameRegex(rotor, CellPattern);
     if (m.Success) {
      this.id = int.Parse(m.Groups[1].Value);
     }
-   
    }
 
   float GetRotorAngle() {
-    string angleText = rotor.DetailedInfo()[“Current angle”]);
+    string angleText = Util.DetailedInfo(rotor)[“Current angle”]);
     return float.Parse(angleText.Split(' ')[0]);
   }
   
@@ -157,7 +187,7 @@ class PrisonCell {
    if (angle != -1) SetCurrentAngle(angle);
   }
 
-  void lock() {
+  void close() {
    int angle = GetCurrentAngle();
    SetCurrentAngle(angle + 45);
   }
