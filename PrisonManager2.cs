@@ -1,7 +1,8 @@
 
 string CellPattern = "Cell 00([1-5])";
-string ChamberPattern = "Cryo ([1-5])([A-D])";
-string ArgumentPattern = "([1-5])([A-D]";
+string IDPattern = "([1-5])([A-D])";
+string ChamberPattern = "Cryo "+IDPattern;
+float RotationSpeed = 3.0;
 
 class Util {
   public static System.Text.RegularExpressions.Match NameRegex(IMyTerminalBlock block, string Pattern) {
@@ -38,22 +39,22 @@ class PrisonManager
     List<IMyTerminalBlock> rotors;
     rotors = grid.SearchBlocksOfName("Cell", rotors, 
       delegate(IMyTerminalBlock block) {
-        return Util.NameRegex(block).Success;
+        return block is IMyMotorStator && Util.NameRegex(block).Success;
       });
     for(int n = 0; n < rotors.Count; n++) {
-      PrisonCell p = new PrisonCell(this, rotors[n]);
+      PrisonCell p = new PrisonCell(this, rotors[n] as IMyMotorStator);
       prisons[p.id] = p;
     }
   }
   
   PrisonCell FindCell(string arg) {
-    System.Text.RegularExpressions.Match m = (new System.Text.RegularExpressions.Regex(ArgumentPattern)).Match(arg);
+    System.Text.RegularExpressions.Match m = (new System.Text.RegularExpressions.Regex(IDPattern)).Match(arg);
     if (!m.Success) {
       Echo("No Prison called [" + arg + "] found");
       return null;
     }
     int rotor = int.Parse(m.Groups[1].Value);
-    var chamber = m.Groups[2].Value; 
+    string chamber = m.Groups[2].Value; 
     PrisonCell cell = prisons[rotor]; 
     cell.requestedChamber = chamber;
     return cell;
@@ -65,9 +66,7 @@ class PrisonManager
   }
   void LockCell(string arg) {
     PrisonCell cell = FindCell(arg);
-    if (cell != null) {
-      cell.close();
-    }
+    if (cell != null) cell.close();
   }
   
   void OpenAll() {
@@ -122,13 +121,13 @@ class PrisonCell {
      default:  return -1;
     }
   }
-  IMyRotorStator rotor;
+  IMyMotorStator rotor;
   PrisonManager manager;
   int id;
   string requestedChamber;
   Dictionary <string, IMyCryoChamber> chambers = new Dictonary<int, IMyCryoChamber>();
 
-  PrisonCell(PrisonManager manager, IMyRotorStator rotor) {
+  PrisonCell(PrisonManager manager, IMyMotorStator rotor) {
     this.rotor = rotor;
     this.manager = manager;
     
@@ -143,30 +142,42 @@ class PrisonCell {
     return float.Parse(angleText.Split(' ')[0]);
   }
   
-  float GetCurrentAngle() {
+  float PreceedingAngle() {
     // sum across the rotor-links;
     int idx = rotorLinks.indexOf(id);
-    if (idx == -1) return GetRotorAngle();
+    if (idx == -1) return 0;
     float angle;
-    for (idx; idx < rotorLinks.Count(); idx++) {
+    for (idx - 1; idx > 0; idx--) {
       angle += manager.prisons[idx].GetRotorAngle();
     }
     return angle;
+  }
+  
+  float GetCurrentAngle() {
+    return PreceedingAngle() + GetRotorAngle();
   }
 
   void SetCurrentAngle(float angle) {
     float current = GetCurrentAngle();
     float speed = 3.0;
+    // TODO -- setting Upper == Lower is janky. We should detect direction and set upper > lower
+    // in the direction that the thing is turning.
     rotor.SetValueFloat("UpperLimit", angle); 
     rotor.SetValueFloat("LowerLimit", angle);
+    
     int diff = angle - current
     if (diff == 0) return;
     if (diff < 0 && diff > -180) {
-      // TODO -- setting Upper == Lower is janky. We should detect direction and set upper > lower
-      // in the direction that the thing is turning.
       speed = -3.0;
     }
     rotor.SetValueFloat("Velocity", speed);
+    
+    // CounterRotate rotors on same chain.
+    int idx = rotorLinks.indexOf(id);
+    if (idx == -1) return;
+    if (rotorLinks.Count > idx) {
+       Echo("Counter rotating by " + diff);
+    }
   }
   
   string visibleChamber() {
