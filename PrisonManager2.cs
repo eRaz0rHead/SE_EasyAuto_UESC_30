@@ -68,38 +68,46 @@ class PrisonManager
     PrisonCell cell = FindCell(arg);
     if (cell != null) cell.close();
   }
-  /*
+ 
   void OpenAll() {
-    for (var p in prisons) {
+    for (int i = 0; i < prisons.Keys.Count; i++) {
+      int k = prisons.Keys.ElementAt(i);
+      PrisonCell p = prisons[k];
       p.openEmptyChamber();
     }
   }
   void LockAll() {
-    for (var p in prisons) {
+    for (int i = 0; i < prisons.Keys.Count; i++) {
+      int k = prisons.Keys.ElementAt(i);
+      PrisonCell p = prisons[k];
       p.close();
     }
   }
-  
+
   void OpenFirstUnoccupied() {
     bool found = false;
-    for (PrisonCell prison in prisons) {
+    for (int i = 0; i < prisons.Keys.Count; i++) {
+      int k = prisons.Keys.ElementAt(i);
+      PrisonCell prison = prisons[k];
       if (prison.hasSpace() && !found) {
         prison.openEmptyChamber();
         found = true;
       } else {
         prison.close();
       }
-    }
+    }  
   }
   
   void LockAllOccupied() {
-    for (PrisonCell prison in prisons) {
-      if (prison.currentCellIsOccupied()) {
-        prison.close();
+     for (int i = 0; i < prisons.Keys.Count; i++) {
+      int k = prisons.Keys.ElementAt(i);
+      PrisonCell p = prisons[k];
+      if (p.currentCellIsOccupied()) {
+        p.close();
       }
     }
   }
-  */
+
   // TODO 
   // SecurePrison(bool)
   // SecurityAlert(bool) {
@@ -143,7 +151,7 @@ class PrisonCell {
   PrisonManager manager;
   int id;
   string requestedChamber;
-  Dictionary <string, IMyCryoChamber> chambers = new Dictonary<int, IMyCryoChamber>();
+  Dictionary <string, IMyCryoChamber> chambers = new Dictonary<string, IMyCryoChamber>();
 
   PrisonCell(PrisonManager manager, IMyMotorStator rotor) {
     this.rotor = rotor;
@@ -217,8 +225,17 @@ class PrisonCell {
    int angle = GetCurrentAngle();
    SetCurrentAngle(angle + 45);
   }
+
   // TODO
-  // hasSpace
-  // openEmptyChamber
-  // currentCellIsOccupied
+  bool hasSpace() {
+    return true;
+  }
+  // TODO
+  void openEmptyChamber() {
+  }
+  
+  // TODO
+  bool currentCellIsOccupied() {
+    return true;
+  }
 }
