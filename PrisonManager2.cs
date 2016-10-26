@@ -88,7 +88,7 @@ class PrisonManager
     for (int i = 0; i < prisons.Keys.Count; i++) {
       int k = prisons.Keys.ElementAt(i);
       PrisonCell prison = prisons[k];
-      if (prison.hasSpace() && !found) {
+      if (!found && prison.hasSpace()) {
         prison.openEmptyChamber();
         found = true;
       } else {
