@@ -1,6 +1,6 @@
 string CellPattern = "Cell 00([1-5])";
 string IDPattern = "([1-5])([A-D])";
-string ChamberPattern = "Cryo "+IDPattern;
+// string ChamberPattern = "Cryo "+IDPattern;
 float RotationSpeed = 3.0;
 
 class Util {
@@ -38,7 +38,7 @@ class PrisonManager
     List<IMyTerminalBlock> rotors;
     grid.SearchBlocksOfName("Cell", rotors, 
       delegate(IMyTerminalBlock block) {
-        return block is IMyMotorStator && Util.NameRegex(block).Success;
+        return block is IMyMotorStator && Util.NameRegex(block, CellPattern).Success;
       });
     for(int n = 0; n < rotors.Count; n++) {
       PrisonCell p = new PrisonCell(this, rotors[n] as IMyMotorStator);
@@ -158,10 +158,26 @@ class PrisonCell {
     
     var m = Util.NameRegex(rotor, CellPattern);
     if (m.Success) {
-     this.id = int.Parse(m.Groups[1].Value);
+      this.id = int.Parse(m.Groups[1].Value);
+      InitChambers();
     }
-   }
+  }
 
+  void InitChambers() {
+    string pattern = "Cryo "+id+"([A-D])";
+    List<IMyTerminalBlock> cryos;
+    grid.SearchBlocksOfName("Cryo ", cryos), 
+      delegate(IMyTerminalBlock block) {
+        return block is IMyCryoChamber && Util.NameRegex(block, pattern).Success;
+      }
+    );
+    
+    for (int i=0; i < cryos.Count; i++) {
+      var m = Util.NameRegex(block, pattern);
+      chambers[m.Groups[1].Value] = cryos.ElementAt(i) as IMyCryoChamber;
+    }
+  }
+  
   float GetRotorAngle() {
     string angleText = Util.DetailedInfo(rotor)[“Current angle”]);
     return float.Parse(angleText.Split(' ')[0]);
@@ -207,33 +223,53 @@ class PrisonCell {
   
   string visibleChamber() {
    // What about IF moving ..
-   int angle = GetCurrentAngle();
-   return CHAMBER_ANGLES(angle);
+    int angle = GetCurrentAngle();
+    return CHAMBER_ANGLES(angle);
   }
 
   void open() {
-   if (requestedChamber != null) openChamber(requestedChamber);
+    if (requestedChamber != null) openChamber(requestedChamber);
   }
 
   void openChamber(string chamber) {
-   int angle = CHAMBER_ANGLES(chamber);
-   if (angle != -1) SetCurrentAngle(angle);
+    int angle = CHAMBER_ANGLES(chamber);
+    if (angle != -1) SetCurrentAngle(angle);
   }
 
   void close() {
-   int angle = GetCurrentAngle();
-   SetCurrentAngle(angle + 45);
+    int angle = GetCurrentAngle();
+    SetCurrentAngle(angle + 45);
   }
-
+/*
+ for (int i = 0; i < prisons.Keys.Count; i++) {
+      int k = prisons.Keys.ElementAt(i);
+      PrisonCell p = prisons[k];
+      p.openEmptyChamber();
+    }
+    */
   // TODO
   bool hasSpace() {
-    return true;
+    for (int i = 0; i < chambers.Keys.Count; i++) {
+      string k = chambers.Keys.ElementAt(i);
+      IMyCryoChamber c = chambers[k];
+      if (!c.isUnderControl) return true;
+    }
+    return false;
   }
   // TODO
   void openEmptyChamber() {
+    for (int i = 0; i < chambers.Keys.Count; i++) {
+      string k = chambers.Keys.ElementAt(i);
+      IMyCryoChamber c = chambers[k];
+      if (!c.isUnderControl) {
+        openChamber(k);
+      }
+    }
   }
   // TODO
   bool currentCellIsOccupied() {
-    return true;
+    string current = visibleChamber();
+    if (current == null) return false;
+    return chambers[current].isUnderControl;
   }
 }
