@@ -37,7 +37,7 @@ class PrisonManager
   
   void Init() {
     List<IMyTerminalBlock> rotors;
-    rotors = grid.SearchBlocksOfName("Cell", rotors, 
+    grid.SearchBlocksOfName("Cell", rotors, 
       delegate(IMyTerminalBlock block) {
         return block is IMyMotorStator && Util.NameRegex(block).Success;
       });
@@ -68,7 +68,7 @@ class PrisonManager
     PrisonCell cell = FindCell(arg);
     if (cell != null) cell.close();
   }
-  
+  /*
   void OpenAll() {
     for (var p in prisons) {
       p.openEmptyChamber();
@@ -99,7 +99,7 @@ class PrisonManager
       }
     }
   }
-  
+  */
   // TODO 
   // SecurePrison(bool)
   // SecurityAlert(bool) {
@@ -121,6 +121,24 @@ class PrisonCell {
      default:  return -1;
     }
   }
+  
+  public static string CHAMBER_ANGLES(int angle) {
+    switch (angle) {
+      case 45:
+      case -315:  
+        return "A";
+      case 135: 
+      case -225: 
+        return "B";
+      case 225:
+      case -135:
+          return "C";
+      case 315:
+      case -45: return "D";
+     default:  return null;
+    }
+  }
+  
   IMyMotorStator rotor;
   PrisonManager manager;
   int id;
@@ -183,10 +201,7 @@ class PrisonCell {
   string visibleChamber() {
    // What about IF moving ..
    int angle = GetCurrentAngle();
-   for (var chamber in ["A", "B", "C", "D"]) {
-    if (CHAMBER_ANGLES(chamber) == angle) return chamber;
-   }
-   return null;
+   return CHAMBER_ANGLES(angle);
   }
 
   void open() {
