@@ -15,7 +15,7 @@ public class PrisonManager
 {
   IMyGridTerminalSystem grid;
   IMyProgrammableBlock me;
-  Dictionary<int, PrisonCell> prisons = new Dictonary<int,PrisonCell>();
+  Dictionary<int, PrisonCell> prisons = new Dictionary<int,PrisonCell>();
   // Used to control rotation of linked rotors.
   List<int> rotorLinks = new List<int> { 2, 1 };
   List<IMyInteriorLight> prisonLights = new List<IMyInteriorLight>();
