@@ -2,7 +2,7 @@
 class Util {
   public static System.Text.RegularExpressions.Match NameRegex(IMyTerminalBlock block, string Pattern) {
     return
-        new System.Text.RegularExpressions.Regex(Pattern).Match(block.GetCustomName());
+        new System.Text.RegularExpressions.Regex(Pattern).Match(block.CustomName);
   }
   
   public static Dictionary<string, string> DetailedInfo(IMyTerminalBlock block) {
