@@ -1,19 +1,19 @@
-string CellPattern = "Cell 00([1-5])";
-string CellIndicatorPattern = "Cell Indicator Light 00([1-5])";
-string IDPattern = "([1-5])([A-D])";
-string PrisonLightGroupName = "Prison Lights";
-float RotationSpeed = 3.0;
 
+string CellIndicatorPattern = "Cell Indicator Light 00([1-5])";
+/*
 Color standard = new Color(100,128,230); // 100, 128, 230
 Color alert = new Color(255,82,41);  // 255, 82, 41
-
+*/
 // base Green - 84, 233, 144
 /** 
  * PrisonManager
  */
 public class PrisonManager
 {
+  static string CellPattern = "Cell 00([1-5])";
+  static string IDPattern = "([1-5])([A-D])";
   IMyGridTerminalSystem grid;
+  
   IMyProgrammableBlock me;
   Dictionary<int, PrisonCell> prisons = new Dictionary<int,PrisonCell>();
   // Used to control rotation of linked rotors.
@@ -32,7 +32,7 @@ public class PrisonManager
   }
   
   private void Init() {
-    List<IMyTerminalBlock> rotors;
+    List<IMyTerminalBlock> rotors = new List<IMyTerminalBlock>();
     grid.SearchBlocksOfName("Cell", rotors, 
       delegate(IMyTerminalBlock block) {
         return block is IMyMotorStator && Util.NameRegex(block, CellPattern).Success;
