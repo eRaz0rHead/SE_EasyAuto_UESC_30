@@ -86,39 +86,35 @@ public class PrisonManager
   }
  
   public void OpenAll() {
-    for (int i = 0; i < prisons.Keys.Count; i++) {
-      int k = prisons.Keys.ElementAt(i);
-      PrisonCell p = prisons[k];
+    for (var e = prisons.Values.GetEnumerator(); e.MoveNext();) {
+      PrisonCell p = e.Current;  
       p.openEmptyChamber();
     }
   }
-  
+
   public void LockAll() {
-    for (int i = 0; i < prisons.Keys.Count; i++) {
-      int k = prisons.Keys.ElementAt(i);
-      PrisonCell p = prisons[k];
+    for (var e = prisons.Values.GetEnumerator(); e.MoveNext();) {
+      PrisonCell p = e.Current;  
       p.close();
     }
   }
 
   public void OpenFirstUnoccupied() {
     bool found = false;
-    for (int i = 0; i < prisons.Keys.Count; i++) {
-      int k = prisons.Keys.ElementAt(i);
-      PrisonCell prison = prisons[k];
-      if (!found && prison.hasSpace()) {
-        prison.openEmptyChamber();
+    for (var e = prisons.Values.GetEnumerator(); e.MoveNext();) {
+      PrisonCell p = e.Current;
+      if (!found && p.hasSpace()) {
+        p.openEmptyChamber();
         found = true;
       } else {
-        prison.close();
+        p.close();
       }
     }  
   }
   
   public void LockAllOccupied() {
-     for (int i = 0; i < prisons.Keys.Count; i++) {
-      int k = prisons.Keys.ElementAt(i);
-      PrisonCell p = prisons[k];
+    for (var e = prisons.Values.GetEnumerator(); e.MoveNext();) {
+      PrisonCell p = e.Current;
       if (p.currentCellIsOccupied()) {
         p.close();
       }
@@ -127,10 +123,9 @@ public class PrisonManager
   
   // TODO 
   public void SecurePrison(bool) {
-      for (int i = 0; i < prisons.Keys.Count; i++) {
-          int k = prisons.Keys.ElementAt(i);
-          PrisonCell p = prisons[k];
-          p.toggleSafetyLock();
+    for (var e = prisons.Values.GetEnumerator(); e.MoveNext();) {
+      PrisonCell p = e.Current;
+        p.toggleSafetyLock();
       }
       isSecure = true;
       securityLighting();
