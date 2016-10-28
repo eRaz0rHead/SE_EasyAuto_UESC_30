@@ -22,4 +22,21 @@ class Util {
     }       
     return properties;       
   }       
+  
+  
+  // FROM WICO -- see if we even need this.
+  static void setLightColor(List < IMyTerminalBlock > lightsList, Color c) {
+    for (int i = 0; i < lightsList.Count; i++) {
+      var light = lightsList[i] as IMyLightingBlock;
+      if (light == null) continue;
+      if (light.GetValue < Color > ("Color").Equals(c) && light.Enabled) {
+        continue;
+      }
+      light.SetValue("Color", c);
+      // make sure we switch the color of the texture as well 
+      light.ApplyAction("OnOff_Off");
+      light.ApplyAction("OnOff_On");
+    }
+  }
+  
 }       
