@@ -8,25 +8,38 @@ class PilotAssist {
   }
   
   
-  // MESSAGES: 
-  // Automatic Drive Assist : 
+  
+  // Automatic Drive Assist :  < Enabled >
+  //    Helios Grav Drive   :  < ON / Engaged >
+  //    Hydrogen Thrusters  :  < OFF / Conserving Fuel >
+  //    Inertial Dampeners  :  < ON >
+  //    
   //    Press 1 = Assisted Orbital Descent.   
   //          9 = Manual Control
   //          
-  // Warning : Entering Natural Gravity field. /n Automatic Drive Assist will switch to Hydrogen Thrusters at 0.5Gs
-  //  ALERT : Inufficient Hydrogen to land on planet. /n Abort re-entry and return to space until tanks are refilled.
-  // Automatic Drive Assist (Press 9 for Manual Control) : Engaging Hydrogen Thrusters in 3 .. 2 .. 1
-  // Automatic Drive Assist (Press 9 for Manual Control) : 
-  //          Hydrogen fuel conservation enabled / Disengaging Hydrogen Thrusters in 3 .. 2 .. 1
+     
   
-  // Automatic Drive Assist : Disabled 
+  // < Entering Natural Gravity field >
+  //      Automatic switch to Hydrogen Thrusters at 0.5Gs
+  
+  //  ALERT : Inufficient Hydrogen to land on planet.
+  //          Abort re-entry and return to space until tanks are refilled.
+  
+  
+  //  < Engaging Hydrogen Thrusters >
+  //        in 3 .. 2 .. 1
+  //  < Fuel Conservation : Disengaging Hydrogen Thrusters >
+  //        in 3 .. 2 .. 1
+  
+  // Automatic Drive Assist : < Disabled >
   //    This vessel is now under manual control.
   //    May Heaven Help us all.
+  //
   //    Manual drive controls are located on your second hotbar.
-  // Press  1 to reactivate Automatic Drive Assist  (please!)
-  //        2 to turn on Gravity Drive. 
-  //        3 to recalibrate Gravity Drive. 
-  //        4 to turn off Gravity Drive. 
+  // Press  1 to reactivate Automatic Drive Assist  (Please!)
+  //        2 to enable Gravity Drive. 
+  //        3 to reset Gravity Drive. 
+  //        4 to disable Gravity Drive. 
   //        5 to toggle on/off Hydrogen thrusters.
   
   
