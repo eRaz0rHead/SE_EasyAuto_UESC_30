@@ -4,14 +4,26 @@
  255, 170, 75
  255, 75, 75
  75, 170 (or 255), 75
+ rgb(75, 255, 255) // light blue
  
+ rgb(255, 230, 0) // yellowish
+ rgb(170, 230, 75) // greenish
  */
 
 /**
     Prison Cell
  */
-public class PrisonCell {       
-    public static string CellIndicatorPattern = "Cell Indicator Light 00([1-5])";       
+public class PrisonCell {   
+
+    List<Color> indicators = {
+        new Color(75, 170, 255),    //  blue
+        new Color(170, 170, 255),   //  mauve   
+        new Color(170, 230, 75),    //  greenish
+        new Color(255, 170, 75),    //  orange
+        new Color(255, 75, 75)      //  red
+    }
+    
+    const string IndicatorPrefix = "Cell Indicator Light 00";       
     public static int CHAMBER_ANGLES(string name) {       
         switch (name) {       
             case "A": return 45;       
@@ -56,7 +68,11 @@ public class PrisonCell {
         if (m.Success) {       
             this.id = int.Parse(m.Groups[1].Value);       
             InitChambers();
-        }       
+            InitIndicator();
+            UpdateIndicator();
+        } else {
+            throw ArgumentException("Unable to create Prison Cell for " + rotor);
+        }
     }       
            
     void InitChambers() {       
@@ -67,9 +83,7 @@ public class PrisonCell {
                 return block is IMyCryoChamber && Util.NameRegex(block, pattern).Success;       
             }       
         );      
- 
         numOccupied = 0;       
- 
         for (int i=0; i < cryos.Count; i++) {       
             IMyCryoChamber cryo = cryos[i] as IMyCryoChamber;       
             var m = Util.NameRegex(cryo, pattern);       
@@ -78,14 +92,32 @@ public class PrisonCell {
                 if (cryo.IsUnderControl) numOccupied++;   
             }             
         }       
-    }       
+    }
+    
+    void InitIndicator() {
+        string pattern = IndicatorPrefix+id;       
+        List<IMyTerminalBlock> lights = new List<IMyTerminalBlock>();       
+        manager.grid.SearchBlocksOfName(IndicatorPrefix, lights,       
+            delegate(IMyTerminalBlock block) {       
+                return block is IMyInteriorLight && Util.NameRegex(block, pattern).Success;       
+            }       
+        );   
+        if (lights.Count == 1) indicator = lights[0];
+        else Echo("No indicator light for Prison #"+id);
+    }
  
+    void UpdateIndicator() {
+        if (indicator == null) return;
+        indicator.SetValue("Color", indicators[numOccupied]);
+        indicator.ApplyAction("OnOff_On");
+    }
+    
     public float GetRotorAngle() {  
-        manager.program.Echo("getRotorAngle "); 
+        Echo("getRotorAngle "); 
         var info = Util.DetailedInfo(rotor); 
         if (!info.ContainsKey("Current angle")) return -361.0F; 
         string angleText = Util.DetailedInfo(rotor)["Current angle"];  
-        manager.program.Echo("getRotorAngle from '"+ angleText+ "' = " + Util.toFloat(angleText)); 
+        Echo("getRotorAngle from '"+ angleText+ "' = " + Util.toFloat(angleText)); 
          
         if (angleText == null) return -361.0F; 
         return  Util.toFloat(angleText);    
@@ -109,7 +141,7 @@ public class PrisonCell {
     }       
            
     public float SetCurrentAngle(float angle) {  
-        manager.program.Echo("setCurrentAngle " + angle + " on rotor "+ this.rotor); 
+        Echo("setCurrentAngle " + angle + " on rotor "+ this.rotor); 
         if (isRotorLocked()) { 
             toggleSafetyLock();     
         }     
@@ -141,7 +173,7 @@ public class PrisonCell {
            
     public void openChamber(string chamber) {       
         int angle = CHAMBER_ANGLES(chamber);   
-        manager.program.Echo("opening chamber "+chamber +" by rotating to " + angle); 
+        Echo("opening chamber "+chamber +" by rotating to " + angle); 
         if (angle != -1) SetCurrentAngle(angle);       
     }       
            
@@ -196,5 +228,8 @@ public class PrisonCell {
     public void rotorAction(String Name) {       
         ITerminalAction Action = this.rotor.GetActionWithName(Name);       
         if(Action != null)  Action.Apply(this.rotor);             
-    }       
+    }  
+    
+    // Convenience methods
+    void Echo(string s) { manager.program.Echo (s); }
 }      
